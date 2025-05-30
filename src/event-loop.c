@@ -44,6 +44,11 @@
 #include "wayland-server-core.h"
 #include "wayland-os.h"
 
+struct itimerspec {
+        struct timespec it_interval;    /* timer period */
+        struct timespec it_value;               /* timer expiration */
+};
+
 /** \cond INTERNAL */
 
 #define TIMER_REMOVED -2
