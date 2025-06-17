@@ -39,6 +39,9 @@
 #ifdef HAVE_SYS_UCRED_H
 #include <sys/ucred.h>
 #endif
+#if defined(__APPLE__) && !defined(EPOLL_SHIM_DISABLE_WRAPPER_MACROS)
+#include <epoll-shim/detail/poll.h>
+#endif
 
 #include "wayland-os.h"
 
@@ -272,4 +275,19 @@ wl_os_mremap_maymove(int fd, void *old_data, ssize_t *old_size,
 		*old_size = 0;
 
 	return result;
+}
+
+int
+wl_os_ppoll(struct pollfd *fds, nfds_t nfds,
+      const struct timespec *timeout_ts, const sigset_t *sigmask)
+{
+#if defined(__APPLE__)
+#ifndef EPOLL_SHIM_DISABLE_WRAPPER_MACROS
+	return epoll_shim_ppoll(fds, nfds, timeout_ts, sigmask);
+#else
+	return -1;
+#endif
+#endif
+
+	return ppoll(fds, nfds, timeout_ts, sigmask);
 }
